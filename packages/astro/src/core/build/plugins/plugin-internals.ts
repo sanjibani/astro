@@ -41,6 +41,8 @@ export function pluginInternals(
 							// need to manually install these themselves if they use the related features.
 							external: [
 								'sharp', // For sharp image service
+								'satteri', // For optional satteri markdown processor
+								'@astrojs/markdown-satteri', // For optional satteri markdown processor
 							],
 						},
 					},
