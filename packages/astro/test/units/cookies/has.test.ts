@@ -14,6 +14,16 @@ describe('astro/src/core/cookies', () => {
 			assert.equal(cookies.has('foo'), true);
 		});
 
+		it('returns true for a cookie with an empty value', () => {
+			let req = new Request('http://example.com/', {
+				headers: {
+					cookie: 'foo=',
+				},
+			});
+			let cookies = new AstroCookies(req);
+			assert.equal(cookies.has('foo'), true);
+		});
+
 		it('returns false if the request does not have the cookie', () => {
 			let req = new Request('http://example.com/');
 			let cookies = new AstroCookies(req);
