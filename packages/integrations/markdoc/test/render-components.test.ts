@@ -52,6 +52,11 @@ function renderComponentsChecks(html: string) {
 	const pre2 = document.querySelectorAll('pre')[1];
 	assert.notEqual(pre2, null);
 	assert.equal(pre2!.className, 'astro-code github-dark');
+
+	// Renders component with multiple hyphens in tag name
+	const multiHyphen = document.querySelector('.multi-hyphen');
+	assert.notEqual(multiHyphen, null);
+	assert.equal(multiHyphen!.textContent, 'Multi hyphen tag works!');
 }
 
 function renderComponentsInsidePartialsChecks(html: string) {

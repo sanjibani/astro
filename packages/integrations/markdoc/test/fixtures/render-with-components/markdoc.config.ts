@@ -28,5 +28,8 @@ export default defineMarkdocConfig({
 		'deeply-nested': {
 			render: component('./src/components/DeeplyNested.astro'),
 		},
+		'my-cool-tag': {
+			render: component('./src/components/MultiHyphen.astro'),
+		},
 	},
 });
