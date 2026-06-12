@@ -68,10 +68,33 @@ export function mergeInlineCss(
 	const lastWasInline = lastAdded?.type === 'inline';
 	const currentIsInline = current?.type === 'inline';
 	if (lastWasInline && currentIsInline) {
-		const merged = { type: 'inline' as const, content: lastAdded.content + current.content };
+		const merged = {
+			type: 'inline' as const,
+			content: hoistAtImports(lastAdded.content + current.content),
+		};
 		acc[acc.length - 1] = merged;
 		return acc;
 	}
 	acc.push(current);
 	return acc;
+}
+
+// Matches CSS @import rules. The CSS at this stage is already minified by Vite,
+// so we don't need to handle comments or unminified whitespace variations.
+const importRegex = /@import\s*(?:url\([^)]*\)|"[^"]*"|'[^']*')[^;]*;/g;
+
+/**
+ * Hoists CSS `@import` rules to the top of the stylesheet.
+ * Per CSS specification, `@import` must appear before all other rules
+ * (except `@charset` and `@layer` declarations), otherwise browsers
+ * silently ignore them.
+ */
+function hoistAtImports(css: string): string {
+	const imports: string[] = [];
+	const rest = css.replace(importRegex, (match) => {
+		imports.push(match);
+		return '';
+	});
+	if (imports.length === 0) return css;
+	return imports.join('') + rest;
 }
