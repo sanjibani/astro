@@ -448,26 +448,37 @@ export const a11y: AuditRuleWithSelector[] = [
 		title: 'HTML element has redundant ARIA roles',
 		message:
 			'Giving these elements an ARIA role that is already set by the browser has no effect and is redundant.',
-		selector: [...a11y_implicit_semantics.keys()].join(','),
+		selector: `[role]:is(${[...a11y_implicit_semantics.keys()].join(',')},input)`,
 		match(element) {
 			const role = element.getAttribute('role');
+			if (!role) return false;
+
+			// Some roles are legitimate workarounds and should not be flagged.
+			// e.g. <ul role="list"> / <ol role="list"> restores list semantics
+			// removed by some browsers when CSS list-style is changed.
+			const exceptions: Record<string, string[]> = {
+				ul: ['list'],
+				ol: ['list'],
+				li: ['listitem'],
+			};
+			if (exceptions[element.localName]?.includes(role)) return false;
 
 			if (element.localName === 'input') {
 				const type = element.getAttribute('type');
-				if (!type) return true;
+				if (!type) return false;
 
 				const implicitRoleForType = input_type_to_implicit_role.get(type);
-				if (!implicitRoleForType) return true;
+				if (!implicitRoleForType) return false;
 
-				if (role === implicitRoleForType) return false;
+				return role === implicitRoleForType;
 			}
 
 			// TODO: Handle menuitem and elements that inherit their role from their parent
 
 			const implicitRole = a11y_implicit_semantics.get(element.localName);
-			if (!implicitRole) return true;
+			if (!implicitRole) return false;
 
-			if (role === implicitRole) return false;
+			return role === implicitRole;
 		},
 	},
 	{
