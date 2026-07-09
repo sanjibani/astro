@@ -240,13 +240,15 @@ function mergeResponses(
 	// prepareResponse can read them when addCookieHeader is true.
 	const originalCookies = getCookiesFromResponse(originalResponse);
 	const newCookies = getCookiesFromResponse(newResponse);
-	if (originalCookies) {
-		// If both responses have cookies, merge new response cookies into original
-		if (newCookies) {
-			for (const cookieValue of newCookies.consume()) {
-				originalResponse.headers.append('set-cookie', cookieValue);
-			}
-		}
+	if (originalCookies && newCookies) {
+		// Both responses set cookies. Merge the new cookies into the original
+		// AstroCookies object so attachCookiesToResponse below emits both
+		// sets. Appending to originalResponse.headers would not help: the
+		// merged response was built from newHeaders above, which is a
+		// separate Headers object copied from originalResponse.headers.
+		originalCookies.merge(newCookies);
+		attachCookiesToResponse(mergedResponse, originalCookies);
+	} else if (originalCookies) {
 		attachCookiesToResponse(mergedResponse, originalCookies);
 	} else if (newCookies) {
 		attachCookiesToResponse(mergedResponse, newCookies);
